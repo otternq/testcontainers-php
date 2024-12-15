@@ -52,13 +52,18 @@ jobs:
     runs-on: ubuntu-latest
     name: Integration Tests
 
+    strategy:
+      matrix:
+        # List of php versions to test on.
+        php-version: ['7.0', '8.1']
+
     steps:
     - uses: actions/checkout@v4
     
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.1'
+        php-version: ${{ matrix.php-version }}
         extensions: redis, pgsql
 
     - name: Install dependencies
