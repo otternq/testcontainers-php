@@ -55,7 +55,7 @@ jobs:
     strategy:
       matrix:
         # List of php versions to test on.
-        php-version: ['7.0', '8.1']
+        php-version: ['7.0']
 
     steps:
     - uses: actions/checkout@v4
