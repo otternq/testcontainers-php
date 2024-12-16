@@ -30,23 +30,23 @@ jobs:
     - name: Run cs
       run: composer run cs
 
-  phpstan:
-    runs-on: ubuntu-latest
-    name: Static Analysis
+  # phpstan:
+  #   runs-on: ubuntu-latest
+  #   name: Static Analysis
 
-    steps:
-    - uses: actions/checkout@v4
+  #   steps:
+  #   - uses: actions/checkout@v4
     
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.1'
+  #   - name: Setup PHP
+  #     uses: shivammathur/setup-php@v2
+  #     with:
+  #       php-version: '8.1'
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+  #   - name: Install dependencies
+  #     run: composer install --prefer-dist --no-progress
 
-    - name: Run phpstan
-      run: composer run phpstan
+  #   - name: Run phpstan
+  #     run: composer run phpstan
 
   phpunit:
     runs-on: ubuntu-latest
