@@ -21,52 +21,84 @@ class Container
 {
     use DockerContainerAwareTrait;
 
-    private string $id;
+    /**
+     * @var string
+     */
+    private $id;
 
-    private ?string $entryPoint = null;
+    /**
+     * @var ?string
+     */
+    private $entryPoint = null;
 
     /**
      * @var array<string, string>
      */
-    private array $env = [];
+    private $env = [];
 
-    private Process $process;
-    private WaitInterface $wait;
+    /**
+     * @var Process
+     */
+    private $process;
+    /**
+     * @var WaitInterface
+     */
+    private  $wait;
 
-    private ?string $hostname = null;
-    private bool $privileged = false;
-    private ?string $network = null;
-    private ?string $healthCheckCommand = null;
-    private int $healthCheckIntervalInMS;
+    /**
+     * @var string
+     */
+    private $hostname = null;
+
+    /**
+     * @var bool
+     */
+    private $privileged = false;
+
+    /**
+     * @var string
+     */
+    private $network = null;
+
+    /**
+     * @var string
+     */
+    private $healthCheckCommand = null;
+
+    /**
+     * @var int
+     */
+    private $healthCheckIntervalInMS;
 
     /**
      * @var array<string>
      */
-    private array $cmd = [];
+    private $cmd = [];
 
     /**
      * @var ContainerInspect
      */
-    private array $inspectedData;
+    private $inspectedData;
 
     /**
      * @var array<string>
      */
-    private array $mounts = [];
+    private $mounts = [];
 
     /**
      * @var array<string>
      */
-    private array $ports = [];
+    private $ports = [];
 
-    protected function __construct(string $image)
+    /**
+     * @var string
+     */
+    private $image;
+
+    public function __construct(string $image)
     {
+        $this->image = $image;
         $this->wait = new WaitForNothing();
-    }
-
-    public static function make(string $image): self
-    {
-        return new Container($image);
     }
 
     public function getId(): string
@@ -161,16 +193,18 @@ class Container
     {
         $this->id = uniqid('testcontainer', true);
 
-        $params = [
-            'docker',
-            'run',
-            '--rm',
-            '--detach',
-            '--name',
-            $this->id,
-            ...$this->mounts,
-            ...$this->ports,
-        ];
+        $params = array_merge(
+            [
+                'docker',
+                'run',
+                '--rm',
+                '--detach',
+                '--name',
+                $this->id
+            ],
+            $this->mounts,
+            $this->ports
+        );
 
         foreach ($this->env as $name => $value) {
             $params[] = '--env';
@@ -284,7 +318,7 @@ class Container
      */
     public function execute(array $command): Process
     {
-        $process = new Process(['docker', 'exec', $this->id, ...$command]);
+        $process = new Process(array_merge(['docker', 'exec', $this->id], $command));
         $process->mustRun();
 
         return $process;

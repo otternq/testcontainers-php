@@ -10,12 +10,12 @@ use Testcontainers\Exception\ContainerNotReadyException;
 
 class WaitForHealthCheck implements WaitInterface
 {
-    public function wait(string $id): void
+    public function wait(string $id)
     {
         $process = new Process(['docker', 'inspect', '--format', '{{json .State.Health.Status}}', $id]);
         $process->mustRun();
 
-        $status = json_decode($process->getOutput(), true, 512, JSON_THROW_ON_ERROR);
+        $status = json_decode($process->getOutput(), true, 512);
 
         if (!is_string($status)) {
             throw new ContainerNotReadyException($id, new RuntimeException('Invalid json output'));

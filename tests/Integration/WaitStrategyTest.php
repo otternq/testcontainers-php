@@ -22,18 +22,17 @@ class WaitStrategyTest extends TestCase
 {
     use DockerContainerAwareTrait;
 
-    public static function tearDownAfterClass(): void
+    public static function tearDownAfterClass()
     {
         parent::tearDownAfterClass();
-
         Registry::cleanup();
     }
 
-    public function testWaitForExec(): void
+    public function testWaitForExec()
     {
         $called = false;
 
-        $container = Container::make('mysql')
+        $container = (new Container('mysql'))
             ->withEnvironment('MYSQL_ROOT_PASSWORD', 'root')
             ->withWait(new WaitForExec(['mysqladmin', 'ping', '-h', '127.0.0.1'], function (Process $process) use (&$called) {
                 $called = true;
@@ -59,9 +58,9 @@ class WaitStrategyTest extends TestCase
         $this->assertNotEmpty($version);
     }
 
-    public function testWaitForLog(): void
+    public function testWaitForLog()
     {
-        $container = Container::make('redis:6.2.5')
+        $container = (new Container('redis:6.2.5'))
             ->withWait(new WaitForLog('Ready to accept connections'));
 
         $container->run();
@@ -85,9 +84,9 @@ class WaitStrategyTest extends TestCase
         $container->remove();
     }
 
-    public function testWaitForHTTP(): void
+    public function testWaitForHTTP()
     {
-        $container = Container::make('nginx:alpine')
+        $container = (new Container('nginx:alpine'))
             ->withWait(WaitForHttp::make(80));
 
         $container->run();
@@ -106,9 +105,9 @@ class WaitStrategyTest extends TestCase
     /**
      * @dataProvider provideWaitForTcpPortOpen
      */
-    public function testWaitForTcpPortOpen(bool $wait): void
+    public function testWaitForTcpPortOpen(bool $wait)
     {
-        $container = Container::make('nginx:alpine');
+        $container = new Container('nginx:alpine');
 
         if ($wait) {
             $container->withWait(WaitForTcpPortOpen::make(80));
@@ -131,7 +130,7 @@ class WaitStrategyTest extends TestCase
     /**
      * @return array<string, array<bool>>
      */
-    public function provideWaitForTcpPortOpen(): array
+    public function provideWaitForTcpPortOpen()
     {
         return [
             'Can connect to container' => [true],
@@ -139,9 +138,9 @@ class WaitStrategyTest extends TestCase
         ];
     }
 
-    public function testWaitForHealthCheck(): void
+    public function testWaitForHealthCheck()
     {
-        $container = Container::make('nginx')
+        $container = (new Container('nginx'))
             ->withHealthCheckCommand('curl --fail http://localhost')
             ->withWait(new WaitForHealthCheck());
 

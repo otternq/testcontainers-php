@@ -6,7 +6,11 @@ namespace Testcontainers\Exception;
 
 class ContainerNotReadyException extends \RuntimeException
 {
-    public function __construct(string $id, ?\Throwable $previous = null)
+    /**
+     * @var string $id
+     * @var Throwable $previous
+     */
+    public function __construct(string $id, $previous = null)
     {
         parent::__construct(sprintf('Container %s is not ready', $id), 0, $previous);
     }

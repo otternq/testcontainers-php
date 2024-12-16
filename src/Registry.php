@@ -8,14 +8,14 @@ use Testcontainers\Container\Container;
 
 class Registry
 {
-    private static bool $registeredCleanup = false;
+    private static $registeredCleanup = false;
 
     /**
      * @var array<int|string, Container>
      */
-    private static array $registry = [];
+    private static $registry = [];
 
-    public static function add(Container $container): void
+    public static function add(Container $container)
     {
         self::$registry[spl_object_id($container)] = $container;
 
@@ -25,12 +25,12 @@ class Registry
         }
     }
 
-    public static function remove(Container $container): void
+    public static function remove(Container $container)
     {
         unset(self::$registry[spl_object_id($container)]);
     }
 
-    public static function cleanup(): void
+    public static function cleanup()
     {
         foreach (self::$registry as $container) {
             $container->remove();

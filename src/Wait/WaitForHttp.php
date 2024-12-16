@@ -5,26 +5,42 @@ declare(strict_types=1);
 namespace Testcontainers\Wait;
 
 use Testcontainers\Exception\ContainerNotReadyException;
-use Testcontainers\Trait\DockerContainerAwareTrait;
+use Testcontainers\Traitt\DockerContainerAwareTrait;
 
 class WaitForHttp implements WaitInterface
 {
     use DockerContainerAwareTrait;
 
-    public const METHOD_GET = 'GET';
-    public const METHOD_POST = 'POST';
-    public const METHOD_PUT = 'PUT';
-    public const METHOD_DELETE = 'DELETE';
-    public const METHOD_HEAD = 'HEAD';
-    public const METHOD_OPTIONS = 'OPTIONS';
+    const METHOD_GET = 'GET';
+    const METHOD_POST = 'POST';
+    const METHOD_PUT = 'PUT';
+    const METHOD_DELETE = 'DELETE';
+    const METHOD_HEAD = 'HEAD';
+    const METHOD_OPTIONS = 'OPTIONS';
 
+    /**
+     * @var string
+     */
+    private $method = 'GET';
 
-    private string $method = 'GET';
-    private string $path = '/';
-    private int $statusCode = 200;
+    /**
+     * @var string
+     */
+    private $path = '/';
 
-    public function __construct(private int $port)
+    /**
+     * @var int
+     */
+    private $statusCode = 200;
+
+    /**
+     * @var int
+     */
+    private $port;
+
+    public function __construct(int $port)
     {
+        $this->port = $port;
     }
 
     public static function make(int $port): self
@@ -56,9 +72,9 @@ class WaitForHttp implements WaitInterface
         return $this;
     }
 
-    public function wait(string $id): void
+    public function wait(string $id)
     {
-        $containerAddress = self::dockerContainerAddress(containerId: $id);
+        $containerAddress = self::dockerContainerAddress($id);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, sprintf('http://%s:%d%s', $containerAddress, $this->port, $this->path));

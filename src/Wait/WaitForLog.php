@@ -9,11 +9,20 @@ use Testcontainers\Exception\ContainerNotReadyException;
 
 class WaitForLog implements WaitInterface
 {
-    public function __construct(private string $message, private bool $enableRegex = false)
+    private $message;
+    private $enableRegex = false;
+
+    /**
+     * @var string $message
+     * @var bool $enableRegex
+     */
+    public function __construct(string $message, bool $enableRegex = false)
     {
+        $this->message = $message;
+        $this->enableRegex = $enableRegex;
     }
 
-    public function wait(string $id): void
+    public function wait(string $id)
     {
         $process = new Process(['docker', 'logs', $id]);
         $process->mustRun();
@@ -30,4 +39,9 @@ class WaitForLog implements WaitInterface
             }
         }
     }
+}
+
+function str_contains($haystack, $needle)
+{
+    return (strpos($haystack, $needle) !== false);
 }

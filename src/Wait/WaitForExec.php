@@ -11,15 +11,28 @@ use Testcontainers\Exception\ContainerNotReadyException;
 class WaitForExec implements WaitInterface
 {
     /**
-     * @param array<string> $command
+     * @var string
      */
-    public function __construct(private array $command, private ?Closure $checkFunction = null)
+    private $command;
+
+    /**
+     * @var Callback
+     */
+    private $checkFunction;
+
+    /**
+     * @param array<string> $command
+     * @param Closure $checkFunction
+     */
+    public function __construct(array $command, Closure $checkFunction = null)
     {
+        $this->command = $command;
+        $this->checkFunction = $checkFunction;
     }
 
-    public function wait(string $id): void
+    public function wait(string $id)
     {
-        $process = new Process(['docker', 'exec', $id, ...$this->command]);
+        $process = new Process(array_merge(['docker', 'exec', $id], $this->command));
 
         try {
             $process->mustRun();
@@ -28,8 +41,7 @@ class WaitForExec implements WaitInterface
         }
 
         if ($this->checkFunction !== null) {
-            $func = $this->checkFunction;
-            $func($process);
+            $this->checkFunction($process);
         }
     }
 }

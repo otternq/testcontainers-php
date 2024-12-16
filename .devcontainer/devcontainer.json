@@ -3,13 +3,16 @@
 {
 	"name": "PHP",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/php:7-bullseye",
+	// "image": "mcr.microsoft.com/devcontainers/php:7-bullseye",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {
-	// 	"ghcr.io/devcontainers/features/docker-in-docker:2": {}
-	// 	// "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
-	// },
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+		// "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+	},
 
 	// Configure tool-specific properties.
 	// "customizations": {},

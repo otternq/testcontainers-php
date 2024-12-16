@@ -6,7 +6,7 @@ namespace Testcontainers\Wait;
 
 class WaitForNothing implements WaitInterface
 {
-    public function wait(string $id): void
+    public function wait(string $id)
     {
         // does nothing
     }

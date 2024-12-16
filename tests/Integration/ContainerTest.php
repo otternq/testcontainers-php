@@ -14,9 +14,9 @@ use Testcontainers\Container\RedisContainer;
 
 class ContainerTest extends TestCase
 {
-    public function testMySQL(): void
+    public function testMySQL()
     {
-        $container = MySQLContainer::make();
+        $container = new MySQLContainer();
         $container->withMySQLDatabase('foo');
         $container->withMySQLUser('bar', 'baz');
 
@@ -25,7 +25,7 @@ class ContainerTest extends TestCase
         $pdo = new \PDO(
             sprintf('mysql:host=%s;port=3306', $container->getAddress()),
             'bar',
-            'baz',
+            'baz'
         );
 
         $query = $pdo->query('SHOW databases');
@@ -37,9 +37,9 @@ class ContainerTest extends TestCase
         $this->assertContains('foo', $databases);
     }
 
-    public function testMariaDB(): void
+    public function testMariaDB()
     {
-        $container = MariaDBContainer::make();
+        $container = new MariaDBContainer();
         $container->withMariaDBDatabase('foo');
         $container->withMariaDBUser('bar', 'baz');
 
@@ -48,7 +48,7 @@ class ContainerTest extends TestCase
         $pdo = new \PDO(
             sprintf('mysql:host=%s;port=3306', $container->getAddress()),
             'bar',
-            'baz',
+            'baz'
         );
 
         $query = $pdo->query('SHOW databases');
@@ -60,16 +60,16 @@ class ContainerTest extends TestCase
         $this->assertContains('foo', $databases);
     }
 
-    public function testRedis(): void
+    public function testRedis()
     {
-        $container = RedisContainer::make();
+        $container = new RedisContainer();
 
         $container->run();
 
         $redis = new Client([
             'scheme' => 'tcp',
             'host'   => $container->getAddress(),
-            'port'   => 6379,
+            'port'   => 6379
         ]);
 
         $redis->ping();
@@ -77,9 +77,9 @@ class ContainerTest extends TestCase
         $this->assertTrue($redis->isConnected());
     }
 
-    public function testOpenSearch(): void
+    public function testOpenSearch()
     {
-        $container = OpenSearchContainer::make();
+        $container = new OpenSearchContainer();
         $container->disableSecurityPlugin();
 
         $container->run();
@@ -93,16 +93,16 @@ class ContainerTest extends TestCase
         $this->assertNotEmpty($response);
 
         /** @var array{cluster_name: string} $data */
-        $data = json_decode($response, true, JSON_THROW_ON_ERROR);
+        $data = json_decode($response, true);
 
         $this->assertArrayHasKey('cluster_name', $data);
 
         $this->assertEquals('docker-cluster', $data['cluster_name']);
     }
 
-    public function testPostgreSQLContainer(): void
+    public function testPostgreSQLContainer()
     {
-        $container = PostgresContainer::make('latest', 'test')
+        $container = (new PostgresContainer('latest', 'test'))
             ->withPostgresUser('test')
             ->withPostgresDatabase('foo')
             ->run();
@@ -111,7 +111,7 @@ class ContainerTest extends TestCase
         $pdo = new \PDO(
             sprintf('pgsql:host=%s;port=5432;dbname=foo', $container->getAddress()),
             'test',
-            'test',
+            'test'
         );
 
         $query = $pdo->query('SELECT datname FROM pg_database');
