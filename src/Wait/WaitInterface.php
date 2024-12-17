@@ -6,5 +6,5 @@ namespace Testcontainers\Wait;
 
 interface WaitInterface
 {
-    public function wait(string $id): void;
+    public function wait(string $id);
 }

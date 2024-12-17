@@ -7,17 +7,37 @@ namespace Testcontainers\Wait;
 use JsonException;
 use RuntimeException;
 use Testcontainers\Exception\ContainerNotReadyException;
-use Testcontainers\Trait\DockerContainerAwareTrait;
+use Testcontainers\Traitt\DockerContainerAwareTrait;
 
 final class WaitForTcpPortOpen implements WaitInterface
 {
     use DockerContainerAwareTrait;
 
-    public function __construct(private readonly int $port, private readonly ?string $network = null)
+    /**
+     * @var int
+     */
+    private $port;
+
+    /**
+     * @var string
+     */
+    private $network;
+
+    /**
+     * @var int $port
+     * @var string $network
+     */
+    public function __construct(int $port, string $network = null)
     {
+        $this->port = $port;
+        $this->network = $network;
     }
 
-    public static function make(int $port, ?string $network = null): self
+    /**
+     * @var int $port
+     * @var string $network
+     */
+    public static function make(int $port, string $network = null): self
     {
         return new self($port, $network);
     }
@@ -25,9 +45,9 @@ final class WaitForTcpPortOpen implements WaitInterface
     /**
      * @throws JsonException
      */
-    public function wait(string $id): void
+    public function wait(string $id)
     {
-        if (@fsockopen(self::dockerContainerAddress(containerId: $id, networkName: $this->network), $this->port) === false) {
+        if (@fsockopen(self::dockerContainerAddress($id, $this->network), $this->port) === false) {
             throw new ContainerNotReadyException($id, new RuntimeException('Unable to connect to container TCP port'));
         }
     }

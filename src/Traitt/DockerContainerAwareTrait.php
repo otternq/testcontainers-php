@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Testcontainers\Trait;
+namespace Testcontainers\Traitt;
 
 use JsonException;
 use Symfony\Component\Process\Process;
@@ -23,7 +23,7 @@ trait DockerContainerAwareTrait
      *
      * @throws JsonException
      */
-    private static function dockerContainerAddress(string $containerId, ?string $networkName = null, ?array $inspectedData = null): string
+    private static function dockerContainerAddress(string $containerId, string $networkName = null, array $inspectedData = null): string
     {
         if (! is_array($inspectedData)) {
             $inspectedData = self::dockerContainerInspect($containerId);
@@ -58,7 +58,7 @@ trait DockerContainerAwareTrait
         $process->mustRun();
 
         /** @var ContainerInspect */
-        return json_decode($process->getOutput(), true, 512, JSON_THROW_ON_ERROR);
+        return json_decode($process->getOutput(), true, 512);
     }
 
     /**
@@ -67,7 +67,7 @@ trait DockerContainerAwareTrait
      *
      * @throws JsonException
      */
-    private static function dockerNetworkFind(string $networkName): array|false
+    private static function dockerNetworkFind(string $networkName)
     {
         $process = new Process(['docker', 'network', 'ls', '--format', 'json', '--filter', 'name=' . $networkName]);
         $process->mustRun();
@@ -82,10 +82,10 @@ trait DockerContainerAwareTrait
         $json = '['. rtrim($json, ',') .']';
 
         /** @var array<int, DockerNetwork> $output */
-        $output = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        $output = json_decode($json, true, 512);
 
         /** @var array<int, DockerNetwork> $matchingNetworks */
-        $matchingNetworks = array_filter($output, static fn (array $network) => $network['Name'] === $networkName);
+        $matchingNetworks = array_filter($output, matchingNetworksFilter);
 
         if (count($matchingNetworks) === 0) {
             return false;
@@ -105,4 +105,8 @@ trait DockerContainerAwareTrait
         $process = new Process(['docker', 'network', 'rm', $networkName, '-f']);
         $process->mustRun();
     }
+}
+
+function matchingNetworksFilter($networkName, array $network) {
+    return $network['Name'] === $networkName;
 }

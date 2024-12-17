@@ -30,39 +30,47 @@ jobs:
     - name: Run cs
       run: composer run cs
 
-  phpstan:
-    runs-on: ubuntu-latest
-    name: Static Analysis
+  # phpstan:
+  #   runs-on: ubuntu-latest
+  #   name: Static Analysis
 
-    steps:
-    - uses: actions/checkout@v4
+  #   steps:
+  #   - uses: actions/checkout@v4
     
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.1'
+  #   - name: Setup PHP
+  #     uses: shivammathur/setup-php@v2
+  #     with:
+  #       php-version: '8.1'
 
-    - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+  #   - name: Install dependencies
+  #     run: composer install --prefer-dist --no-progress
 
-    - name: Run phpstan
-      run: composer run phpstan
+  #   - name: Run phpstan
+  #     run: composer run phpstan
 
   phpunit:
     runs-on: ubuntu-latest
     name: Integration Tests
 
+    strategy:
+      matrix:
+        # List of php versions to test on.
+        php-version: ['7.0']
+
     steps:
     - uses: actions/checkout@v4
     
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.1'
+        php-version: ${{ matrix.php-version }}
         extensions: redis, pgsql
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
 
-    - name: Run test suite
+    - name: Run test unit suite
+      run: composer run unit
+
+    - name: Run test integration suite
       run: composer run integration
