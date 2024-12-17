@@ -28,17 +28,29 @@ class WaitStrategyTest extends TestCase
         Registry::cleanup();
     }
 
+    protected function tearDown()
+    {
+        Container::$containerID = "";
+    }
+
     public function testWaitForExec()
     {
+        Container::$containerID = "waitstrategytest-testwaitforexec";
+
         $called = false;
 
-        $container = (new Container('mysql'))
-            ->withEnvironment('MYSQL_ROOT_PASSWORD', 'root')
-            ->withWait(new WaitForExec(['mysqladmin', 'ping', '-h', '127.0.0.1'], function (Process $process) use (&$called) {
+        $container = (new Container('mariadb:10'))
+            ->withEnvironment('MARIADB_ROOT_PASSWORD', 'root')
+            ->withWait(new WaitForExec(['healthcheck.sh', '--connect'], function (Process $process) use (&$called) {
                 $called = true;
             }));
 
-        $container->run();
+        try {
+            $container->run();
+        } catch (ContainerNotReadyException $e) {
+            $this->fail("Container isn't ready yet: ". $e->getPrevious()->getMessage() ."\n");
+        }
+
 
         $this->assertTrue($called, 'Wait function was not called');
         unset($called);
@@ -46,7 +58,7 @@ class WaitStrategyTest extends TestCase
         $pdo = new \PDO(
             sprintf('mysql:host=%s;port=3306', $container->getAddress()),
             'root',
-            'root'
+            'apassword'
         );
 
         $query = $pdo->query('select version()');
@@ -60,6 +72,8 @@ class WaitStrategyTest extends TestCase
 
     public function testWaitForLog()
     {
+        Container::$containerID = "waitstrategytest-testwaitforlog";
+
         $container = (new Container('redis:6.2.5'))
             ->withWait(new WaitForLog('Ready to accept connections'));
 
@@ -86,6 +100,8 @@ class WaitStrategyTest extends TestCase
 
     public function testWaitForHTTP()
     {
+        Container::$containerID = "waitstrategytest-testwaitforhttp";
+
         $container = (new Container('nginx:alpine'))
             ->withWait(WaitForHttp::make(80));
 
@@ -107,6 +123,8 @@ class WaitStrategyTest extends TestCase
      */
     public function testWaitForTcpPortOpen(bool $wait)
     {
+        Container::$containerID = "waitstrategytest-testwaitfortcpportopen";
+
         $container = new Container('nginx:alpine');
 
         if ($wait) {
@@ -116,7 +134,12 @@ class WaitStrategyTest extends TestCase
         $container->run();
 
         if ($wait) {
-            static::assertIsResource(fsockopen($container->getAddress(), 80), 'Failed to connect to container');
+            static::assertTrue(
+                is_resource(
+                    fsockopen($container->getAddress(), 80)
+                ),
+                'Failed to connect to container'
+            );
             return;
         }
 
@@ -140,6 +163,7 @@ class WaitStrategyTest extends TestCase
 
     public function testWaitForHealthCheck()
     {
+        Container::$containerID = "waitstrategytest-waitforhealthcheck";
         $container = (new Container('nginx'))
             ->withHealthCheckCommand('curl --fail http://localhost')
             ->withWait(new WaitForHealthCheck());
@@ -154,8 +178,8 @@ class WaitStrategyTest extends TestCase
         $response = curl_exec($ch);
 
         $this->assertNotEmpty($response);
-        $this->assertIsString($response);
+        $this->assertInternalType('string', $response);
 
-        $this->assertStringContainsString('Welcome to nginx!', $response);
+        $this->assertContains('Welcome to nginx!', $response);
     }
 }
