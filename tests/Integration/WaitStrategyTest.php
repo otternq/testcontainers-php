@@ -35,7 +35,7 @@ class WaitStrategyTest extends TestCase
 
     public function testWaitForExec()
     {
-        Container::$containerID = "waitstrategytest-testwaitforexec";
+        // Container::$containerID = "waitstrategytest-testwaitforexec";
 
         $called = false;
 
@@ -72,7 +72,7 @@ class WaitStrategyTest extends TestCase
 
     public function testWaitForLog()
     {
-        Container::$containerID = "waitstrategytest-testwaitforlog";
+        // Container::$containerID = "waitstrategytest-testwaitforlog";
 
         $container = (new Container('redis:6.2.5'))
             ->withWait(new WaitForLog('Ready to accept connections'));
@@ -100,7 +100,7 @@ class WaitStrategyTest extends TestCase
 
     public function testWaitForHTTP()
     {
-        Container::$containerID = "waitstrategytest-testwaitforhttp";
+        // Container::$containerID = "waitstrategytest-testwaitforhttp";
 
         $container = (new Container('nginx:alpine'))
             ->withWait(WaitForHttp::make(80));
@@ -123,7 +123,7 @@ class WaitStrategyTest extends TestCase
      */
     public function testWaitForTcpPortOpen(bool $wait)
     {
-        Container::$containerID = "waitstrategytest-testwaitfortcpportopen";
+        // Container::$containerID = "waitstrategytest-testwaitfortcpportopen";
 
         $container = new Container('nginx:alpine');
 
@@ -163,7 +163,8 @@ class WaitStrategyTest extends TestCase
 
     public function testWaitForHealthCheck()
     {
-        Container::$containerID = "waitstrategytest-waitforhealthcheck";
+        // Container::$containerID = "waitstrategytest-waitforhealthcheck";
+
         $container = (new Container('nginx'))
             ->withHealthCheckCommand('curl --fail http://localhost')
             ->withWait(new WaitForHealthCheck());
