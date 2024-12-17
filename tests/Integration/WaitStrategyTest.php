@@ -58,7 +58,7 @@ class WaitStrategyTest extends TestCase
         $pdo = new \PDO(
             sprintf('mysql:host=%s;port=3306', $container->getAddress()),
             'root',
-            'apassword'
+            'root'
         );
 
         $query = $pdo->query('select version()');
