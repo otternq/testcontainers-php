@@ -34,7 +34,8 @@
         }
     },
     "scripts": {
-        "integration": "paratest tests/ --bootstrap vendor/autoload.php -f",
+        "integration": "paratest ./tests/Integration --bootstrap vendor/autoload.php -f",
+        "unit": "paratest ./tests/Unit --bootstrap vendor/autoload.php -f",
         "cs": "php-cs-fixer fix --dry-run",
         "cs:fix": "php-cs-fixer fix",
         "phpstan": "phpstan analyse"
