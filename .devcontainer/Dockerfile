@@ -32,7 +32,6 @@ RUN apt-get -qq install -y --no-install-recommends \
     "php${PHP_VERSION}-cli" \
     "php${PHP_VERSION}-fpm" \
     "php${PHP_VERSION}-mysqlnd" \
-    "php${PHP_VERSION}-pgsql" \
     "php${PHP_VERSION}-curl" \
     "php${PHP_VERSION}-geoip" \
     "php${PHP_VERSION}-memcached" \

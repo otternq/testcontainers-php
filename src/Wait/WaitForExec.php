@@ -41,7 +41,8 @@ class WaitForExec implements WaitInterface
         }
 
         if ($this->checkFunction !== null) {
-            $this->checkFunction($process);
+            $func = $this->checkFunction;
+            $func($process);
         }
     }
 }
