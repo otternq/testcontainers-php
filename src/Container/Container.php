@@ -8,6 +8,7 @@ use Symfony\Component\Process\Process;
 use Testcontainers\Exception\ContainerNotReadyException;
 use Testcontainers\Registry;
 use Testcontainers\Traitt\DockerContainerAwareTrait;
+use Testcontainers\Traitt\ContainerIDTrait;
 use Testcontainers\Wait\WaitForNothing;
 use Testcontainers\Wait\WaitInterface;
 
@@ -20,6 +21,7 @@ use Testcontainers\Wait\WaitInterface;
 class Container
 {
     use DockerContainerAwareTrait;
+    use ContainerIDTrait;
 
     /**
      * @var string
@@ -103,6 +105,11 @@ class Container
 
     public function getId(): string
     {
+        if ($this->id !== null) {
+            return $this->id;
+        }
+
+        $this->id = self::getContainerID();
         return $this->id;
     }
 
@@ -191,8 +198,24 @@ class Container
 
     public function run(bool $wait = true): self
     {
-        $this->id = uniqid('testcontainer', true);
+        $params = $this->getCommandParams();
 
+        $this->process = new Process($params);
+        $this->process->mustRun();
+
+        $this->inspectedData = self::dockerContainerInspect($this->getId());
+
+        Registry::add($this);
+
+        if ($wait) {
+            $this->wait();
+        }
+
+        return $this;
+    }
+
+    public function getCommandParams()
+    {
         $params = array_merge(
             [
                 'docker',
@@ -200,7 +223,7 @@ class Container
                 '--rm',
                 '--detach',
                 '--name',
-                $this->id
+                $this->getId()
             ],
             $this->mounts,
             $this->ports
@@ -243,37 +266,28 @@ class Container
             array_push($params, ...$this->cmd);
         }
 
-        $this->process = new Process($params);
-        $this->process->mustRun();
-
-        $this->inspectedData = self::dockerContainerInspect($this->id);
-
-        Registry::add($this);
-
-        if ($wait) {
-            $this->wait();
-        }
-
-        return $this;
+        return $params;
     }
 
     public function wait(int $wait = 100): self
     {
+        $lastException = null;
         for ($i = 0; $i < $wait; $i++) {
             try {
-                $this->wait->wait($this->id);
+                $this->wait->wait($this->getId());
                 return $this;
             } catch (ContainerNotReadyException $e) {
+                $lastException = $e;
                 usleep(500000);
             }
         }
 
-        throw new ContainerNotReadyException($this->id);
+        throw new ContainerNotReadyException($this->getId(), $lastException->getPrevious());
     }
 
     public function stop(): self
     {
-        $stop = new Process(['docker', 'stop', $this->id]);
+        $stop = new Process(['docker', 'stop', $this->getId()]);
         $stop->mustRun();
 
         return $this;
@@ -281,7 +295,7 @@ class Container
 
     public function start(): self
     {
-        $start = new Process(['docker', 'start', $this->id]);
+        $start = new Process(['docker', 'start', $this->getId()]);
         $start->mustRun();
 
         return $this;
@@ -289,7 +303,7 @@ class Container
 
     public function restart(): self
     {
-        $restart = new Process(['docker', 'restart', $this->id]);
+        $restart = new Process(['docker', 'restart', $this->getId()]);
         $restart->mustRun();
 
         return $this;
@@ -297,7 +311,7 @@ class Container
 
     public function remove(): self
     {
-        $remove = new Process(['docker', 'rm', '-f', $this->id]);
+        $remove = new Process(['docker', 'rm', '-f', $this->getId()]);
         $remove->mustRun();
 
         Registry::remove($this);
@@ -307,7 +321,7 @@ class Container
 
     public function kill(): self
     {
-        $kill = new Process(['docker', 'kill', $this->id]);
+        $kill = new Process(['docker', 'kill', $this->getId()]);
         $kill->mustRun();
 
         return $this;
@@ -318,7 +332,7 @@ class Container
      */
     public function execute(array $command): Process
     {
-        $process = new Process(array_merge(['docker', 'exec', $this->id], $command));
+        $process = new Process(array_merge(['docker', 'exec', $this->getId()], $command));
         $process->mustRun();
 
         return $process;
@@ -326,7 +340,7 @@ class Container
 
     public function logs(): string
     {
-        $logs = new Process(['docker', 'logs', $this->id]);
+        $logs = new Process(['docker', 'logs', $this->getId()]);
         $logs->mustRun();
 
         return $logs->getOutput();
@@ -335,7 +349,7 @@ class Container
     public function getAddress(): string
     {
         return self::dockerContainerAddress(
-            $this->id,
+            $this->getId(),
             $this->network,
             $this->inspectedData
         );
